@@ -49,7 +49,7 @@ const hasPriority = (requestQuery) => {
 };
 
 
-// Get All ToDo items with Different Query Parameters
+// Get All ToDo items with Different Query Parameters API
 app.get("/todos/", async(request, response) => {
     let getAllTodosQuery = "";
     const { search_q = "", priority, status } = request.query;
@@ -103,7 +103,7 @@ app.get("/todos/", async(request, response) => {
 });
 
 
-// Get ToDo item by ToDO Id
+// Get ToDo item by ToDO Id API
 app.get("/todos/:todoId/", async(request, response) => {
     const { todoId } = request.params;
 
@@ -121,7 +121,7 @@ app.get("/todos/:todoId/", async(request, response) => {
 });
 
 
-// Create ToDo item
+// Create ToDo item API
 app.post("/todos/", async(request, response) => {
     const { id, todo, status, priority } = request.body;
 
@@ -137,7 +137,7 @@ app.post("/todos/", async(request, response) => {
 });
 
 
-// Update Todo Item by ToDO Id
+// Update Todo Item by ToDO Id API
 app.put("/todos/:todoId/", async(request, response) => {
     const { todoId } = request.params;
 
@@ -203,7 +203,20 @@ app.put("/todos/:todoId/", async(request, response) => {
 });
 
 
+// Delete ToDo Item by ToDO Id API
+app.delete("/todos/:todoId/", async(request, response) => {
+    const { todoId } = request.params;
 
+    const deleteTodoQuery = `
+    DELETE FROM
+      todo
+    WHERE
+      id = ${ todoId };`;
+
+    await db.run(deleteTodoQuery);
+
+    response.send("Todo Deleted");
+});
 
 
 
