@@ -203,44 +203,145 @@ app.get("/agenda/", async(request, response) => {
 });
 
 
-// Create  ToDo item
+// Create ToDo Item API
 app.post("/todos/", async(request, response) => {
-    try {const { id, todo, category, priority, status, dueDate } = request.body;
-
+    const { id, todo, category, priority, status, dueDate } = request.body;
     if (priority === "HIGH" || priority === "MEDIUM" || priority === "LOW") {
-
         if (status === "TO DO" || status === "IN PROGRESS" || status === "DONE") {
-
-             if (category === "WORK" || category === "HOME" || category === "LEARNING") {
-
-                 if (isValid(new Date(dueDate)) === true) {
-
+            if (category === "WORK" || category === "HOME" || category === "LEARNING") {
+                if ((isValid(new Date(dueDate))) ===true) {
                     const date = format(new Date(dueDate), 'yyyy-MM-dd');
 
                     const createTodoQuery = `
-                    INSERT INTO
-                      todo
-                    VALUES('${id}', '${todo}', '${category}', '${priority}', '${status}', '${dueDate});`;
+                        INSERT INTO
+                          todo (id, todo, category, priority, status, due_date)
+                        VALUES
+                          ('${id}', '${todo}', '${category}', '${priority}', '${status}', '${date}');`;
 
-                    const todo = await db.get(createTodoQuery);
-                    console.log(databaseObjects(todo))
+                    const todos = await db.run(createTodoQuery);
                     response.send("Todo Successfully Added");
-                 } else {
+                } else {
                     response.status(400);
-                 };
-             };
-        };
-    };
-} catch (e) {
-    console.log(`DBError: ${e.message}`);
-};
+                    response.send("Invalid Due Date");
+                }
+            } else {
+                response.status(400);
+                response.send("Invalid Todo Category");
+            }
+        } else {
+            response.status(400);
+            response.send("Invalid Todo Status");
+        }
+    } else {
+        response.status(400);
+        response.send("Invalid Todo Priority");
+    }
 });
 
 
+// Update ToDo Item API
+app.put("/todos/:todoId/", async(request, response) => {
+    const { todoId } = request.params;
 
+    let updateTodoQuery = "";
 
+    const requestBody = request.body;
 
+    switch (true) {
+        case requestBody.status !== undefined:
+            const { status } = request.body;
+            if (status === "TO DO" || status === "IN PROGRESS" || status === "DONE") {
 
+                updateTodoQuery = `
+                UPDATE
+                  todo
+                SET
+                  status = '${status}'
+                WHERE
+                  id = ${ todoId };`;
+
+                await db.run(updateTodoQuery);
+                response.send("Status Updated");
+            } else {
+                response.status(400);
+                response.send("Invalid Todo Status");
+            };
+            break;
+        case  requestBody.priority !== undefined:
+            const { priority } = request.body;
+
+            if (priority === "HIGH" || priority === "MEDIUM" || priority === "LOW") {
+
+                updateTodoQuery = `
+                UPDATE
+                  todo
+                SET
+                  priority = '${priority}'
+                WHERE
+                  id = ${ todoId };`;
+
+                await db.run(updateTodoQuery);
+                response.send("Priority Updated");
+                } else {
+                    response.status(400);
+                    response.send("Invalid Todo Priority");
+                };
+            break;
+        case requestBody.todo !== undefined:
+            const { todo } = request.body;
+
+            updateTodoQuery = `
+            UPDATE
+              todo
+            SET
+              todo = '${ todo }'
+            WHERE
+              id = '${ todoId }';`;
+
+            await db.run(updateTodoQuery);
+            response.send("Todo Updated");
+            break;
+        case requestBody.category !== undefined:
+            const { category } = request.body;
+
+            if (category === "WORK" || category === "HOME" || category === "LEARNING") {
+
+                updateTodoQuery = `
+                UPDATE
+                  todo
+                SET
+                  category = '${category}'
+                WHERE
+                  id = '${ todoId }';`;
+
+                await db.run(updateTodoQuery);
+                response.send("Category Updated");
+            } else {
+                response.status(400);
+                response.send("Invalid Todo Category");
+            };
+            break;
+        case requestBody.dueDate !== undefined:
+            const { dueDate } = request.body;
+            if (isValid(new Date(dueDate)) === true) {
+                const date = format(new Date(dueDate), 'yyyy-MM-dd');
+                updateTodoQuery = `
+                UPDATE
+                  todo
+                SET
+                  due_date = '${date}'
+                WHERE
+                  id = '${ todoId }';`;
+                
+                await db.run(updateTodoQuery);
+                response.send("Due Date Updated");
+            } else {
+                response.status(400);
+                response.send("Invalid Due Date");
+            };
+            break;
+    };
+});
 
 
 // Delete ToDo Item by ToDO Id API
