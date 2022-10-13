@@ -1,0 +1,28 @@
+GET http://localhost:3000/todos/
+###
+
+GET http://localhost:3000/todos/?category=HOME
+###
+
+
+
+GET http://localhost:3000/agenda/?date=2021-14-2
+###
+
+# 2021-04-04
+# 2020-9-22
+# 2021-2-22
+# 2021-1-12
+# 2021-4-2
+
+POST http://localhost:3000/todos/
+Content-Type: application/json
+
+{
+  "id": 6,
+  "todo": "Finalize event theme",
+  "priority": "LOW",
+  "status": "TO DO",
+  "category": "HOME",
+  "dueDate": "2021-02-22"
+}
